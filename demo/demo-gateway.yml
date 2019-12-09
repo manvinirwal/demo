@@ -1,0 +1,44 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: demo-gateway
+  namespace: manvi
+  labels:
+    gateway: demo-gateway
+    istio: ingressgateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - demo.manvi.34.67.38.135.nip.io
+    - port:
+        number: 80
+        name: http2
+        protocol: HTTP2
+      hosts:
+        - demo.manvi.34.67.38.135.nip.io
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: demo-gw-virtualservice
+  namespace: manvi
+  labels:
+    service: demo-gw-virtualservice
+spec:
+  hosts:
+    - demo.manvi.34.67.38.135.nip.io
+  gateways:
+    - demo-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: demo

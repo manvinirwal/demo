@@ -34,6 +34,14 @@
     "dtoSuffix": "DTO",
     "otherModules": [],
     "enableTranslation": false,
-    "blueprints": []
+    "blueprints": [],
+    "appsFolders": ["demo"],
+    "directoryPath": "../",
+    "dockerRepositoryName": "manvinirwal",
+    "dockerPushCommand": "docker push",
+    "kubernetesNamespace": "manvi",
+    "ingressDomain": "34.67.38.135.nip.io",
+    "monitoring": "no",
+    "istio": true
   }
 }
