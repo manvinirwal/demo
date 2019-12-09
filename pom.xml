@@ -89,6 +89,10 @@
         <junit.utReportFolder>${project.testresult.directory}/test</junit.utReportFolder>
         <junit.itReportFolder>${project.testresult.directory}/integrationTest</junit.itReportFolder>
         <!-- jhipster-needle-maven-property -->
+        <gatling.version>3.3.1</gatling.version>
+        <gatling-plugin.version>3.0.5</gatling-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+        <scala-maven-plugin.version>4.3.0</scala-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -101,6 +105,7 @@
                 <scope>import</scope>
             </dependency>
             <!-- jhipster-needle-maven-add-dependency-management -->
+            
         </dependencies>
     </dependencyManagement>
 
@@ -365,9 +370,18 @@
             <artifactId>metrics-core</artifactId>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
+        <dependency>
+          <groupId>io.gatling.highcharts</groupId>
+          <artifactId>gatling-charts-highcharts</artifactId>
+           <version>${gatling.version}</version>
+            <scope>test</scope>
+         </dependency>
+
+
     </dependencies>
 
     <build>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
@@ -488,6 +502,40 @@
                 </executions>
             </plugin>
             <!-- jhipster-needle-maven-add-plugin -->
+            <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>${scala-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <jvmArgs>
+                <jvmArg>-Xss100M</jvmArg>
+              </jvmArgs>
+              <args>
+                <arg>-target:jvm-1.8</arg>
+                <arg>-deprecation</arg>
+                <arg>-feature</arg>
+                <arg>-unchecked</arg>
+                <arg>-language:implicitConversions</arg>
+                <arg>-language:postfixOps</arg>
+              </args>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.gatling</groupId>
+        <artifactId>gatling-maven-plugin</artifactId>
+        <version>${gatling-plugin.version}</version>
+      </plugin>
         </plugins>
         <pluginManagement>
             <plugins>

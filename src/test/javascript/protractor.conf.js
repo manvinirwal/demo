@@ -13,7 +13,7 @@ exports.config = {
     browserName: 'chrome',
     chromeOptions: {
 	  //binary: "/usr/bin/google-chrome-stable",
-        args: [ '--headless', '--disable-gpu', '--window-size=800,600', '--disable-gpu', '--window-size=800,600','--no-sandbox','--disable-dev-shm-usage' ]
+        args: [ '--headless', '--disable-gpu', '--disable-gpu', '--no-sandbox','--disable-dev-shm-usage' ]
     }
   },
 
