@@ -1,0 +1,79 @@
+pipeline {
+    agent any
+    environment{
+      NAMESPACE = "manvi"
+      GIT_URL = "https://github.com/manvinirwal/demo.git"
+      PROJECT_ID = "payment-platform-204588"
+      CLUSTER_NAME = "final-cluster"
+      DOCKER_BASE = "manvinirwal"
+      CLUSTER_ZONE = "us-central1-a"
+      SONAR_URL = "http://35.223.133.170:9000/sonar"
+      OLD_INGRESS_IP = "35.188.51.172"
+      NEW_INGRESS_IP = "34.67.38.135"
+      time = "60"
+    }
+    stages {
+         stage("Git clone"){
+             steps{
+                 cleanWs()
+                 git credentialsId: 'GIT_CRED_MANVI', url: "${GIT_URL}"
+                 script {
+                  env.COMMIT_ID = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+                 }
+             }
+          }
+        // stage('Replace IP in all files') {
+        //      steps{
+        //           sh "git grep -l ${OLD_INGRESS_IP} | xargs sed -i 's/${OLD_INGRESS_IP}/${NEW_INGRESS_IP}/g'"
+        //           sh "git grep -l ${OLD_BASE_URL} | xargs sed -i 's/${OLD_BASE_URL}/${NEW_BASE_URL}/g'"
+        //         }
+        // }
+        stage("Maven Clean, Build, Docker Push"){
+              steps{ 
+                      withCredentials([string(credentialsId: 'DOCKER_CRED_MANVI', variable: 'DOCKER_CRED_MANVI')]) {
+                       sh "docker login -u manvinirwal -p ${DOCKER_CRED_MANVI}"
+                       } 
+                      sh "chmod +x mvnw" 
+                      sh "./mvnw -ntp -Pprod verify jib:build -Djib.to.image=${DOCKER_BASE}/demo:${COMMIT_ID}"  
+               }
+           }
+         
+        stage("Sonar Analysis"){
+            steps{
+        withSonarQubeEnv('sonarqube-server') {
+                    sh "./mvnw -Pprod clean verify sonar:sonar \
+                    -Dsonar.host.url=${SONAR_URL} \
+                    -Dsonar.login=ab5974fb6e7d2d6c0ef47e583e950e5679a00a28"  
+           
+        }
+            }
+    }
+           
+         stage("Deploy"){ 
+            steps{
+                    sh "gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE} --project ${PROJECT_ID}"
+                    sh "sh kubectl-apply.sh"
+                    sh "kubectl set image deployment.v1.apps/demo demo-app=${DOCKER_BASE}/demo:${COMMIT_ID} -n=${NAMESPACE}"
+                    sleep time.toInteger()
+                }         
+         }
+        stage("End2End test"){
+             steps{
+                    sh 'npm run e2e'
+             }
+        }
+        stage('Gatling test'){
+            steps{
+                sh "mvn clean gatling:test"
+                gatlingArchive()
+            }
+        }
+    }
+    post {
+        always {
+          script {
+            googleStorageUpload bucket: 'gs://protractor_test_reports', credentialsId: 'PROTRACTOR_TEST_STORAGE', pattern: 'mocha/reports/mochawesome.json'
+          }
+        }
+    }
+}
