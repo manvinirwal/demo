@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 class BasicSimulation extends Simulation {
   
   val httpProtocol = http
-    .baseUrl("http://demo.manvi.34.67.38.135.nip.io/") // Here is the root for all relative URLs
+    .baseUrl("http://demo.manvi.34.67.38.135.nip.io") // Here is the root for all relative URLs
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8") // Here are the common headers
     .acceptEncodingHeader("gzip, deflate")
     .acceptLanguageHeader("en-US,en;q=0.5")
@@ -27,6 +27,6 @@ class BasicSimulation extends Simulation {
       .get("/"))
     .pause(2)
 
-  setUp(scn1.inject(atOnceUsers(1)).protocols(httpProtocol))
+  setUp(scn1.inject(atOnceUsers(100)).protocols(httpProtocol))
 
 }
